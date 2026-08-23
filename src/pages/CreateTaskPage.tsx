@@ -72,15 +72,23 @@ export function CreateTaskPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: CreateTaskForm) =>
-      createTask({
-        ...data,
-        // dueDate vem como "YYYY-MM-DD" do input HTML. A API espera ISO completo.
-        // Se vier vazio, manda hoje+7d como fallback. Nunca enviar string vazia.
-        dueDate: data.dueDate
-          ? new Date(data.dueDate + 'T00:00:00').toISOString()
-          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      }),
+    mutationFn: (data: CreateTaskForm) => {
+      // dueDate vem como "YYYY-MM-DD" do input HTML. A API espera ISO completo.
+      // Estratégia à prova de bala: tenta parsear; se falhar OU vier vazio,
+      // usa hoje+7d. Garante que NUNCA enviamos string vazia pro backend.
+      const date = new Date(data.dueDate + 'T00:00:00');
+      const isValid = !isNaN(date.getTime());
+      const finalDueDate = isValid
+        ? date.toISOString()
+        : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+      return createTask({
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        dueDate: finalDueDate,
+      });
+    },
     onSuccess: () => {
       // Invalida o cache da lista pra forçar refetch
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
