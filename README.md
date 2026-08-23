@@ -94,16 +94,27 @@ Abre em `http://localhost:6006` — aqui você vê cada componente isolado, com 
 
 ---
 
-## 🧩 Componentes principais
+## 🧩 Componentes implementados
 
-| Componente | O que faz | Onde é usado |
+| Componente | O que faz | Onde é usado | Story? |
+|---|---|---|---|
+| `TaskStatusChip` | Chip colorido por status (Pending/InProgress/Concluded) | Lista | ✅ 4 stories |
+
+## 🛣️ Próximos componentes (roadmap)
+
+- [ ] `TaskPriorityIcon` — ícone por prioridade (Low/Medium/High)
+- [ ] `TaskCard` — card visual completo (placeholder na lista hoje)
+- [ ] `CommentList` — lista de comentários no detalhe
+- [ ] `EmptyState` — estado vazio reutilizável
+- [ ] `FormField` — wrapper de campo de formulário com label/erro
+
+## ✅ Páginas implementadas
+
+| Rota | Status | Observação |
 |---|---|---|
-| `TaskStatusChip` | Chip colorido por status (Pending/InProgress/Concluded) | Lista + detalhe |
-| `TaskPriorityIcon` | Ícone por prioridade | Lista + detalhe |
-| `TaskCard` | Card visual completo de uma tarefa | Lista |
-| `CommentList` | Lista de comentários com avatar | Detalhe |
-
-Todos têm história no Storybook.
+| `/` (lista) | ✅ Consome `GET /api/tasks` via TanStack Query | Mostra loading, erro e vazio |
+| `/tasks/:id` | 🟡 Placeholder | Falta consumir API e renderizar detalhe |
+| `/create` | 🟡 Placeholder | Falta formulário com validação |
 
 ---
 
@@ -160,15 +171,18 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 ## 🗺️ Roadmap
 
-- [x] Setup (Vite + React + TS + MUI + Storybook)
+- [x] Setup (Vite + React + TS + MUI + Storybook + TanStack Query)
 - [x] Tema customizado Material Design M2
 - [x] Integração com API (tipos + client + endpoints)
 - [x] Layout principal + roteamento
-- [ ] Componentes: TaskStatusChip, TaskPriorityIcon, TaskCard, CommentList
+- [x] `TaskStatusChip` componente + stories
+- [x] `TaskListPage` consumindo API com TanStack Query
+- [ ] `TaskDetailPage` consumindo API
+- [ ] `CreateTaskPage` com formulário (React Hook Form)
+- [ ] Componentes: `TaskPriorityIcon`, `TaskCard`, `CommentList`, `EmptyState`
 - [ ] Stories do Storybook pra cada componente
-- [ ] Formulário de criação com validação
-- [ ] Filtros na listagem
-- [ ] Tratamento de erro visual
+- [ ] Filtros na listagem (status/priority)
+- [ ] Tratamento de erro visual (toast/snackbar)
 
 ---
 
