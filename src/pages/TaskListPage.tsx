@@ -25,12 +25,16 @@ import {
   ListItemText,
   Paper,
   Divider,
+  Fab,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getTasks } from '../api/tasks';
 import { TaskStatusChip } from '../components/TaskStatusChip';
 
 export function TaskListPage() {
+  const navigate = useNavigate();
   const { data, isPending, isError, error } = useQuery({
     queryKey: ['tasks'],
     queryFn: () => getTasks(),
@@ -54,12 +58,22 @@ export function TaskListPage() {
 
   if (!data || data.length === 0) {
     return (
-      <Paper sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="h6">Nenhuma tarefa ainda</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Crie a primeira usando o botão "Nova Tarefa" no topo.
-        </Typography>
-      </Paper>
+      <Box>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="h6">Nenhuma tarefa ainda</Typography>
+          <Typography variant="body2" color="text.secondary">
+            Clique no botão ➕ abaixo pra criar a primeira.
+          </Typography>
+        </Paper>
+        <Fab
+          color="primary"
+          aria-label="criar nova tarefa"
+          onClick={() => navigate('/create')}
+          sx={{ position: 'fixed', bottom: 24, right: 24 }}
+        >
+          <AddIcon />
+        </Fab>
+      </Box>
     );
   }
 
@@ -85,6 +99,16 @@ export function TaskListPage() {
           ))}
         </List>
       </Paper>
+
+      {/* FAB: ação primária visível em qualquer estado */}
+      <Fab
+        color="primary"
+        aria-label="criar nova tarefa"
+        onClick={() => navigate('/create')}
+        sx={{ position: 'fixed', bottom: 24, right: 24 }}
+      >
+        <AddIcon />
+      </Fab>
     </Box>
   );
 }
