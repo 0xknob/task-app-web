@@ -41,11 +41,33 @@ import { createTask } from '../api/tasks';
 // ============================================================
 // SCHEMA DE VALIDAÇÃO — VOCÊ PREENCHE AS REGRAS
 // ============================================================
+// Regras:
+// - title: 3 a 200 chars
+// - description: opcional, max 2000 chars
+// - priority: enum
+// - dueDate: obrigatório, formato YYYY-MM-DD, NÃO pode ser no passado
+const todayString = () => new Date().toISOString().slice(0, 10);
+
 const createTaskSchema = z.object({
-  title: z.string(), // TODO: adicione .min(3).max(200)
-  description: z.string(), // TODO: adicione validação (opcional? tamanho?)
+  title: z
+    .string()
+    .min(3, 'Título deve ter pelo menos 3 caracteres.')
+    .max(200, 'Título não pode ter mais de 200 caracteres.'),
+  description: z
+    .string()
+    .max(2000, 'Descrição não pode ter mais de 2000 caracteres.')
+    .optional()
+    .or(z.literal('')),
   priority: z.enum(['Low', 'Medium', 'High']),
-  dueDate: z.string(), // TODO: use z.coerce.date() e valide se é no futuro
+  dueDate: z
+    .string()
+    .min(1, 'Vencimento é obrigatório.')
+    .refine((val) => {
+      // valida formato YYYY-MM-DD
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) return false;
+      // valida que não é no passado
+      return val >= todayString();
+    }, 'Vencimento não pode ser no passado.'),
 });
 
 type CreateTaskForm = z.infer<typeof createTaskSchema>;
@@ -64,10 +86,10 @@ export function CreateTaskPage() {
       title: '',
       description: '',
       priority: 'Medium',
-      // Input type="date" espera "YYYY-MM-DD" (sem hora). Hoje+7d como sugestão.
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 10),
+      // Campo vazio propositalmente: o input HTML type="date" sobrepõe
+      // qualquer default com a data atual se o usuário aceitar o calendário.
+      // Deixamos vazio e a validação Zod obriga o usuário a escolher.
+      dueDate: '',
     },
   });
 
@@ -82,12 +104,14 @@ export function CreateTaskPage() {
         ? date.toISOString()
         : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-      return createTask({
+      const payload = {
         title: data.title,
-        description: data.description,
+        description: data.description ?? '',
         priority: data.priority,
         dueDate: finalDueDate,
-      });
+      };
+
+      return createTask(payload);
     },
     onSuccess: () => {
       // Invalida o cache da lista pra forçar refetch
