@@ -64,7 +64,10 @@ export function CreateTaskPage() {
       title: '',
       description: '',
       priority: 'Medium',
-      dueDate: '',
+      // Input type="date" espera "YYYY-MM-DD" (sem hora). Hoje+7d como sugestão.
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10),
     },
   });
 
@@ -72,8 +75,11 @@ export function CreateTaskPage() {
     mutationFn: (data: CreateTaskForm) =>
       createTask({
         ...data,
-        // dueDate vem como string do input; a API espera ISO completo
-        dueDate: new Date(data.dueDate).toISOString(),
+        // dueDate vem como "YYYY-MM-DD" do input HTML. A API espera ISO completo.
+        // Se vier vazio, manda hoje+7d como fallback. Nunca enviar string vazia.
+        dueDate: data.dueDate
+          ? new Date(data.dueDate + 'T00:00:00').toISOString()
+          : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       }),
     onSuccess: () => {
       // Invalida o cache da lista pra forçar refetch
