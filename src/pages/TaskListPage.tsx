@@ -28,7 +28,9 @@ import {
   Fab,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useNavigate } from 'react-router-dom';
+// `RouterLink` é passado como prop `component={}` pro ListItem —
+// usado de verdade no JSX abaixo.
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getTasks } from '../api/tasks';
 import { TaskStatusChip } from '../components/TaskStatusChip';
@@ -88,7 +90,14 @@ export function TaskListPage() {
             <Box key={task.id}>
               {index > 0 && <Divider />}
               <ListItem
+                component={RouterLink}
+                to={`/tasks/${task.id}`}
                 secondaryAction={<TaskStatusChip status={task.status} />}
+                sx={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  '&:hover': { backgroundColor: 'action.hover' },
+                }}
               >
                 <ListItemText
                   primary={task.title}
