@@ -1,25 +1,6 @@
-// src/pages/CreateTaskPage.tsx
-
-/**
- * Página de criação de tarefa.
- *
- * ARQUITETURA:
- * - React Hook Form gerencia estado do formulário
- * - Zod valida os campos (schema = contrato)
- * - useMutation do TanStack Query chama a API
- * - onSuccess: invalida a query 'tasks' pra lista recarregar
- *
- * SUA TAREFA:
- * - O esqueleto tá pronto
- * - Falta o mais importante: as REGRAS DE VALIDAÇÃO no schema Zod
- * - Olhe o tipo CreateTaskDto em types/task.ts pra saber os campos
- * - Decida: título mínimo/máximo? descrição obrigatória? dueDate no futuro?
- *
- * DICA:
- * - z.string().min(3, 'mínimo 3 chars')
- * - z.enum(['Low', 'Medium', 'High'])
- * - z.coerce.date() pra converter string ISO em Date
- */
+// Create-task form. React Hook Form for state, Zod for validation,
+// TanStack Query mutation for POST. onSuccess invalidates ['tasks']
+// so the list refetches and we navigate back.
 
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

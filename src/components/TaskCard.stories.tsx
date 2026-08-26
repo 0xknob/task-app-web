@@ -1,13 +1,6 @@
-// src/components/TaskCard.stories.tsx
-
-/**
- * Stories do Storybook para o TaskCard.
- *
- * POR QUE 4+ STORIES?
- * - Cada combinação status × prioridade × vencimento merece visualização
- * - Eder/designer/PO conseguem revisar visual sem rodar a app
- * - Acessibilidade: aria-label e foco visível já configurados
- */
+// Storybook docs for TaskCard. Run `npm run storybook`.
+// Each story covers a different status × priority × due-date combination
+// so designers/POs can review visuals without running the app.
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TaskCard } from './TaskCard';
@@ -22,7 +15,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Helper pra criar tarefa fake com defaults sobrescrevíveis
+// Factory for fake tasks in stories. Pass overrides on top of defaults.
 function makeTask(overrides: Partial<Task> = {}): Task {
   return {
     id: '00000000-0000-0000-0000-000000000000',

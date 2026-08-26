@@ -1,20 +1,5 @@
-// src/components/TaskStatusChip.tsx
-
-/**
- * Chip colorido que representa o status de uma tarefa.
- *
- * POR QUE EXISTE?
- * - Status aparece em vários lugares (lista, detalhe, filtros)
- * - Sem este componente, cada lugar escreveria a lógica de cor
- * - Centralizar = mudar a cor em UM lugar
- *
- * DECISÃO DE DESIGN:
- * - Pending → warning (laranja): "precisa atenção"
- * - InProgress → info (azul claro): "em andamento, sem urgência"
- * - Concluded → success (verde): "feito, fechado"
- *
- * Se você discorda, mexe aqui. É o único lugar.
- */
+// Single source of truth for task-status color/label mapping.
+// Change colors here and every list/detail/filters updates.
 
 import { Chip } from '@mui/material';
 import type { TaskStatus } from '../types/task';

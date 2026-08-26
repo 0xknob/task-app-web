@@ -1,20 +1,5 @@
-// src/components/TaskCard.tsx
-
-/**
- * Card visual completo de uma tarefa.
- *
- * POR QUE EXISTE?
- * - ListItem do MUI é genérico demais pra mostrar tudo de uma tarefa
- * - Card é a forma padrão do Material Design pra conteúdo agrupado
- * - Reutilizável: lista, dashboard, busca, etc.
- *
- * DECISÕES DE DESIGN:
- * - PrioridadeAlta → borda esquerda vermelha (sinal visual forte)
- * - PrioridadeMédia → borda esquerda azul
- * - PrioridadeBaixa → borda esquerda cinza
- * - Tarefa atrasada → badge vermelho no canto
- * - Clickable: prop opcional pra navegação
- */
+// Visual card for a task. Bordered on the left by priority,
+// faded/strikethrough when concluded, warning icon when overdue.
 
 import { Box, Card, CardContent, Typography, Stack, Chip, CardActionArea } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -27,9 +12,9 @@ interface TaskCardProps {
 }
 
 const PRIORITY_BORDER_COLOR: Record<string, string> = {
-  Low: '#bdbdbd',     // cinza
-  Medium: '#0288d1',  // azul info
-  High: '#d32f2f',    // vermelho error
+  Low: '#bdbdbd',
+  Medium: '#0288d1',
+  High: '#d32f2f',
 };
 
 const PRIORITY_LABEL: Record<string, string> = {
@@ -38,7 +23,7 @@ const PRIORITY_LABEL: Record<string, string> = {
   High: 'Alta',
 };
 
-/** "Vence em 3 dias" / "Vence hoje" / "Vencida há 2 dias" */
+// Returns a human label like "Vence em 3 dias" and whether the date is overdue.
 function formatDueDate(isoDate: string): { label: string; overdue: boolean } {
   const due = new Date(isoDate);
   const today = new Date();

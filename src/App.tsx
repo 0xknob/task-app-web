@@ -1,12 +1,4 @@
-// src/App.tsx
-
-/**
- * Componente raiz da aplicação.
- *
- * O QUE FAZ?
- * - Define o layout principal (AppBar no topo + container)
- * - Configura as rotas (URL → página)
- */
+// Root component: AppBar with nav links + routed pages.
 
 import { Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Container, Button, Box } from '@mui/material';
@@ -19,7 +11,6 @@ import { CreateTaskPage } from './pages/CreateTaskPage';
 function App() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      {/* Cabeçalho fixo */}
       <AppBar position="static">
         <Toolbar>
           <CheckCircleOutlineIcon sx={{ mr: 1 }} />
@@ -35,7 +26,6 @@ function App() {
         </Toolbar>
       </AppBar>
 
-      {/* Conteúdo das páginas */}
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Routes>
           <Route path="/" element={<TaskListPage />} />

@@ -1,17 +1,4 @@
-// src/components/TaskStatusChip.stories.tsx
-
-/**
- * Stories do Storybook para o TaskStatusChip.
- *
- * POR QUE EXISTE?
- * - Storybook é "documentação viva" do componente
- * - Permite ver cada estado visual sem rodar a app
- * - Útil pro designer/PO revisar visual sem ambiente
- *
- * CONVENÇÃO:
- * - Meta: args padrão + quais controles o Storybook expõe
- * - Story: variações concretas (cada status, cada variant)
- */
+// Storybook docs for TaskStatusChip. Run `npm run storybook`.
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TaskStatusChip } from './TaskStatusChip';

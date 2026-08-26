@@ -1,19 +1,6 @@
-// src/pages/TaskListPage.tsx
-
-/**
- * Página principal: lista de tarefas vindas da API, com filtros.
- *
- * COMO FUNCIONA:
- * 1. useQuery do TanStack Query chama getTasks(filtros)
- * 2. QueryKey inclui os filtros → mudar filtro = refetch automático
- * 3. Mostra loading, erro, vazio ou grid de TaskCards
- * 4. FAB ➕ abre CreateTaskPage
- *
- * DECISÕES:
- * - Filtros são server-side (param na URL da API)
- * - Quando muda filtro, queryKey muda, TanStack busca de novo
- * - useMemo garante que params só muda quando filtros mudam (evita refetch desnecessário)
- */
+// Main page: lists tasks from the API with status/priority filters.
+// queryKey includes filterParams so changing filters triggers a refetch.
+// useMemo keeps filterParams referentially stable to avoid refetch loops.
 
 import {
   Box,

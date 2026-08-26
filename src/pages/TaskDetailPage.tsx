@@ -1,24 +1,5 @@
-// src/pages/TaskDetailPage.tsx
-
-/**
- * Página de detalhe de uma tarefa.
- *
- * ARQUITETURA:
- * - useParams do react-router captura o {id} da URL
- * - useQuery com queryKey ['task', id] chama getTaskById(id)
- * - Render condicional: loading / erro / não encontrada / sucesso
- *
- * POR QUE queryKey COM ID?
- * - O TanStack Query cacheia por chave. ['task', id] é diferente de ['task', outroId]
- * - Quando você volta pra lista e clica em outro item, é outra query, outro cache
- *
- * MELHORIAS:
- * - Data de vencimento com lógica inteligente (vence em / vencida há)
- * - Lista de comentários com avatar de iniciais + data relativa
- * - Mutação de concluir tarefa (altera status no backend, invalida cache)
- * - Mutação de atribuir a si mesmo (pra demonstrar fluxo de assign)
- * - Skeleton loading mais profissional que CircularProgress
- */
+// Task detail page. Uses queryKey ['task', id] so each task gets its
+// own cache entry. Mutations invalidate both this task and the list.
 
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
