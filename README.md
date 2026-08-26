@@ -1,205 +1,143 @@
-# 🚀 task-app-web — Front-end React
+# task-app-web — Front-end React
 
-> **Microsserviço consumido por uma UI React profissional: Material Design M2, Storybook, TypeScript end-to-end.**
+> Interface React para consumir o microsserviço [`task-app`](https://github.com/0xknob/task-app) (backend .NET 10 + DDD + CQRS).
+>
+> Construído como projeto de aprendizado de portfólio fullstack.
 
-[![React](https://img.shields.io/badge/React-18-61DAFB)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-7-646CFF)](https://vitejs.dev/)
-[![Material](https://img.shields.io/badge/Material--UI-M2-0081CB)](https://mui.com/)
-[![Storybook](https://img.shields.io/badge/Storybook-8-FF4785)](https://storybook.js.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8-646CFF)](https://vite.dev/)
+[![Material UI](https://img.shields.io/badge/MUI--M2-0081CB)](https://mui.com/)
+[![Storybook](https://img.shields.io/badge/Storybook-10-FF4785)](https://storybook.js.org/)
+[![TanStack Query](https://img.shields.io/badge/TanStack_Query-5-FF4154)](https://tanstack.com/query)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
 
-## 🎯 O que é
+## Stack
 
-Interface de usuário para consumir o microsserviço **task-app** (backend .NET).
-
-Construído com:
-
-- **React 18** + **TypeScript**
-- **Vite** (build tool rápido)
-- **Material UI** com tema customizado para **Material Design 2** (M2)
-- **Storybook** para documentar componentes visuais
-- **TanStack Query** para gerenciar cache de requisições
-- **Axios** para chamadas HTTP
-
-A ideia é mostrar domínio de React em produção: arquitetura escalável, componentes reutilizáveis, integração real com API.
-
----
-
-## 🏗️ Arquitetura
-
-```
-src/
-├── api/                ← Cliente HTTP + funções que chamam a API
-├── components/         ← Componentes visuais reutilizáveis (com Storybook)
-├── pages/              ← Páginas da aplicação
-├── theme/              ← Tema Material Design M2 customizado
-├── types/              ← Tipos TypeScript que espelham o backend
-├── stories/            ← Histórias do Storybook
-├── App.tsx             ← Layout principal + rotas
-└── main.tsx            ← Entry point (providers: tema, query, router)
-```
-
-### Stack justificada
-
-| Tecnologia | Por que essa escolha |
+| Camada | Tecnologia |
 |---|---|
-| **Vite** | Padrão atual. Build 100× mais rápido que Webpack. |
-| **Material UI (MUI)** | Implementa Material Design. A empresa usa M2. |
-| **Storybook** | Forma profissional de documentar componentes visuais. |
-| **TanStack Query** | Substitui Redux/Context pra cache HTTP. Mais simples. |
-| **Axios** | Cliente HTTP. Interceptors, tratamento de erro uniforme. |
-| **React Router** | Padrão de mercado pra navegação SPA. |
+| Framework | React 19 |
+| Linguagem | TypeScript 6 |
+| Build / dev server | Vite 8 |
+| UI | Material UI 9 com tema customizado **Material Design 2 (M2)** |
+| HTTP client | Axios |
+| Server-state | TanStack Query v5 |
+| Forms | React Hook Form + Zod |
+| Componentes visuais | Storybook 10 |
+| Roteamento | React Router 7 |
 
 ---
 
-## 🚀 Como rodar
+## Quick start
 
 ### Pré-requisitos
 
-- **Node.js 20+** (LTS)
-- **Backend rodando** — siga o README do [`task-app`](https://github.com/0xknob/task-app) e deixe a API na porta `5000`.
+- Node.js 20+ (recomendado 24)
+- Backend [`task-app`](https://github.com/0xknob/task-app) rodando na porta `5000`
 
-### Instalação
+### Comandos
 
 ```bash
 npm install
+npm run dev          # dev server em http://localhost:5173
+npm run build        # build de produção em dist/
+npm run storybook    # Storybook em http://localhost:6006
+npm run lint         # oxlint
 ```
 
-### Dev (com hot-reload)
+---
 
-```bash
-npm run dev
+## Estrutura
+
+```
+src/
+├── api/           ← Camada HTTP: client axios + funções por endpoint
+├── components/    ← Componentes visuais reutilizáveis (cada um com .stories.tsx)
+├── pages/         ← Páginas roteadas
+├── theme/         ← Tema Material Design M2 customizado
+├── types/         ← Tipos TypeScript espelhando o backend
+└── App.tsx        ← Layout + rotas
 ```
 
-Abre em `http://localhost:5173`.
+---
 
-### Build de produção
+## Páginas
 
-```bash
-npm run build
-```
+| Rota | O que faz |
+|---|---|
+| `/` | Lista de tarefas com filtros de status e prioridade. Cards clicáveis. |
+| `/tasks/:id` | Detalhe de uma tarefa. Mutações de concluir e atribuir. |
+| `/create` | Formulário de criação com validação Zod. |
 
-Saída em `dist/`.
+## Componentes com Storybook
 
-### Storybook
+| Componente | Stories | Estado |
+|---|---|---|
+| `TaskStatusChip` | 4 (Pending / InProgress / Concluded / AllVariants) | ✅ Maduro |
+| `TaskCard` | 6 (PendingMedium / InProgressHigh / ConcludedLow / OverdueHigh / WithComments / AllStates) | ✅ Maduro |
+
+---
+
+## Decisões de arquitetura (curtas)
+
+- **TanStack Query em vez de Redux/Context** — server-state não é state global da app, é cache de rede. TanStack Query lida com refetch, retry, invalidação por chave (`['tasks', filters]`).
+- **Filtros server-side** — `useQuery(['tasks', filterParams])` muda a chave quando o filtro muda, TanStack dispara refetch automático. Backend aceita `?status=&priority=`.
+- **Validação Zod no client + server** — redundância proposital. Client dá feedback instantâneo; backend é a fonte da verdade.
+- **Tema M2 customizado** — a empresa-alvo usa M2 (não M3). Tema em `src/theme/theme.ts` define tokens (cores, typography Roboto, borderRadius 4px).
+- **Storybook por componente** — não Storybook do app inteiro. Cada componente isolado, com controles pra variar props. Designers/POs revisam visual sem rodar a app.
+
+---
+
+## Status do projeto (honesto)
+
+✅ **Feito e funcional**
+- Setup completo, tema M2, 2 componentes com stories
+- 3 páginas funcionais (lista com filtros, detalhe, criação)
+- Integração end-to-end com backend
+- Validação client + server
+
+🟡 **Em progresso**
+- Acessibilidade (a11y) — foco e aria-labels parciais
+- Cobertura de testes no front (Vitest instalado mas sem suite ainda)
+
+🔴 **Ainda não feito**
+- Autenticação (qualquer um cria tarefas — não tem user concept no front)
+- Testes E2E (Playwright instalado mas não configurado)
+- Internacionalização (hoje só pt-BR)
+- PWA / offline mode
+- CI pipeline no GitHub Actions
+
+---
+
+## Integração com backend
+
+URL base configurada em `src/api/client.ts`. Em dev usa `http://localhost:5000`.
+Pra produção, troca por variável `VITE_API_URL` (Azure App Service URL).
+
+| Endpoint do back | Função no front |
+|---|---|
+| `GET /api/tasks?status=&priority=` | `getTasks(params)` |
+| `GET /api/tasks/{id}` | `getTaskById(id)` |
+| `POST /api/tasks` | `createTask(payload)` |
+| `POST /api/tasks/{id}/conclude` | `concludeTask(id)` |
+| `POST /api/tasks/{id}/assign` | `assignTask(id, payload)` |
+| `POST /api/tasks/{id}/comments` | `addComment(id, payload)` |
+
+---
+
+## Como rodar Storybook pra revisar componentes isolados
 
 ```bash
 npm run storybook
 ```
 
-Abre em `http://localhost:6006` — aqui você vê cada componente isolado, com controles pra variar props.
+Abre em `http://localhost:6006`. Você vê cada componente com controles pra
+mudar props, ver estados visuais, validar acessibilidade (addon a11y).
 
 ---
 
-## 🧩 Componentes implementados
+## Licença
 
-| Componente | O que faz | Onde é usado | Story? |
-|---|---|---|---|
-| `TaskStatusChip` | Chip colorido por status (Pending/InProgress/Concluded) | Lista | ✅ 4 stories |
-
-## 🛣️ Próximos componentes (roadmap)
-
-- [ ] `TaskPriorityIcon` — ícone por prioridade (Low/Medium/High)
-- [ ] `TaskCard` — card visual completo (placeholder na lista hoje)
-- [ ] `CommentList` — lista de comentários no detalhe
-- [ ] `EmptyState` — estado vazio reutilizável
-- [ ] `FormField` — wrapper de campo de formulário com label/erro
-
-## ✅ Páginas implementadas
-
-| Rota | Status | Observação |
-|---|---|---|
-| `/` (lista) | ✅ Consome `GET /api/tasks` via TanStack Query | Mostra loading, erro e vazio |
-| `/tasks/:id` | 🟡 Placeholder | Falta consumir API e renderizar detalhe |
-| `/create` | 🟡 Placeholder | Falta formulário com validação |
-
----
-
-## 🔗 Integração com o backend
-
-A URL base da API fica em `src/api/client.ts`. Padrão: `http://localhost:5000` (ASP.NET).
-
-```typescript
-// src/api/client.ts
-const API_BASE_URL = 'http://localhost:5000';
-```
-
-Quando for pra produção (Azure), troca por variável de ambiente:
-
-```typescript
-const API_BASE_URL = import.meta.env.VITE_API_URL;
-```
-
-### Endpoints consumidos
-
-| Método | Rota | Função |
-|---|---|---|
-| GET | `/api/tasks` | `getTasks()` |
-| GET | `/api/tasks/{id}` | `getTaskById()` |
-| POST | `/api/tasks` | `createTask()` |
-| POST | `/api/tasks/{id}/conclude` | `concludeTask()` |
-| POST | `/api/tasks/{id}/assign` | `assignTask()` |
-| POST | `/api/tasks/{id}/comments` | `addComment()` |
-
----
-
-## 📡 Endpoints do próprio front (rotas)
-
-| Rota | Componente |
-|---|---|
-| `/` | `TaskListPage` |
-| `/tasks/:id` | `TaskDetailPage` |
-| `/create` | `CreateTaskPage` |
-
----
-
-## 📚 Conceitos aplicados
-
-| Conceito | Onde usar |
-|---|---|
-| **Hooks** (`useState`, `useEffect`) | Estados locais |
-| **TanStack Query** (`useQuery`, `useMutation`) | Cache HTTP |
-| **React Router** (`Routes`, `Route`, `Link`) | Navegação |
-| **Material UI** (`Box`, `Container`, `AppBar`) | Layout |
-| **TypeScript** (`interface`, `type`, genéricos) | Tipagem |
-| **Storybook** (`Meta`, `StoryObj`) | Documentação |
-
----
-
-## 🗺️ Roadmap
-
-- [x] Setup (Vite + React + TS + MUI + Storybook + TanStack Query)
-- [x] Tema customizado Material Design M2
-- [x] Integração com API (tipos + client + endpoints)
-- [x] Layout principal + roteamento
-- [x] `TaskStatusChip` componente + stories
-- [x] `TaskListPage` consumindo API com TanStack Query
-- [ ] `TaskDetailPage` consumindo API
-- [ ] `CreateTaskPage` com formulário (React Hook Form)
-- [ ] Componentes: `TaskPriorityIcon`, `TaskCard`, `CommentList`, `EmptyState`
-- [ ] Stories do Storybook pra cada componente
-- [ ] Filtros na listagem (status/priority)
-- [ ] Tratamento de erro visual (toast/snackbar)
-
----
-
-## 🤝 Contribuindo
-
-Projeto de aprendizado. Sugestões via PR.
-
----
-
-## 📄 Licença
-
-MIT — veja [LICENSE](LICENSE) pra detalhes.
-
----
-
-## 👤 Autor
-
-**0xknob** — dev em formação fullstack (.NET + React + Azure).
-
-> *"Um microsserviço sem front é só um endpoint. Front sem material design é só código. Os dois juntos são produto."*
+MIT — veja [LICENSE](LICENSE).
