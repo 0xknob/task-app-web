@@ -1,18 +1,18 @@
 // src/pages/TaskListPage.tsx
 
 /**
- * Página principal: lista de tarefas vindas da API.
+ * Página principal: lista de tarefas vindas da API, com filtros.
  *
  * COMO FUNCIONA:
- * 1. useQuery do TanStack Query chama getTasks()
- * 2. Mostra "Carregando..." enquanto pending
- * 3. Mostra erro se a request falhou
- * 4. Renderiza a lista quando os dados chegam
+ * 1. useQuery do TanStack Query chama getTasks(filtros)
+ * 2. QueryKey inclui os filtros → mudar filtro = refetch automático
+ * 3. Mostra loading, erro, vazio ou grid de TaskCards
+ * 4. FAB ➕ abre CreateTaskPage
  *
- * DECISÃO:
- * - TanStack Query cuida de cache, retry, refetch
- * - Não usamos useState/useEffect manual pra chamada HTTP
- *   (esse era o jeito antigo, dá problema com cache)
+ * DECISÕES:
+ * - Filtros são server-side (param na URL da API)
+ * - Quando muda filtro, queryKey muda, TanStack busca de novo
+ * - useMemo garante que params só muda quando filtros mudam (evita refetch desnecessário)
  */
 
 import {
@@ -20,61 +20,127 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  List,
-  ListItem,
-  ListItemText,
   Paper,
-  Divider,
   Fab,
+  Stack,
+  Chip,
+  MenuItem,
+  TextField,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-// `RouterLink` é passado como prop `component={}` pro ListItem —
-// usado de verdade no JSX abaixo.
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { getTasks } from '../api/tasks';
-import { TaskStatusChip } from '../components/TaskStatusChip';
+import { TaskCard } from '../components/TaskCard';
+import type { TaskStatus, Priority } from '../types/task';
+
+type StatusFilter = 'All' | TaskStatus;
+type PriorityFilter = 'All' | Priority;
+
+const STATUS_OPTIONS: StatusFilter[] = ['All', 'Pending', 'InProgress', 'Concluded'];
+const PRIORITY_OPTIONS: PriorityFilter[] = ['All', 'Low', 'Medium', 'High'];
+
+const STATUS_LABEL: Record<StatusFilter, string> = {
+  All: 'Todos',
+  Pending: 'Pendente',
+  InProgress: 'Em progresso',
+  Concluded: 'Concluída',
+};
+
+const STATUS_COLOR: Record<StatusFilter, 'default' | 'warning' | 'info' | 'success'> = {
+  All: 'default',
+  Pending: 'warning',
+  InProgress: 'info',
+  Concluded: 'success',
+};
 
 export function TaskListPage() {
   const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('All');
+
+  // useMemo: objeto params só muda de identidade quando filtros mudam.
+  // Sem isso, queryKey seria um objeto novo a cada render → refetch infinito.
+  const filterParams = useMemo(
+    () => ({
+      status: statusFilter === 'All' ? undefined : statusFilter,
+      priority: priorityFilter === 'All' ? undefined : priorityFilter,
+    }),
+    [statusFilter, priorityFilter],
+  );
+
   const { data, isPending, isError, error } = useQuery({
-    queryKey: ['tasks'],
-    queryFn: () => getTasks(),
+    queryKey: ['tasks', filterParams],
+    queryFn: () => getTasks(filterParams),
   });
+
+  const fab = (
+    <Fab
+      color="primary"
+      aria-label="criar nova tarefa"
+      onClick={() => navigate('/create')}
+      sx={{ position: 'fixed', bottom: 24, right: 24 }}
+    >
+      <AddIcon />
+    </Fab>
+  );
 
   if (isPending) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-        <CircularProgress />
+      <Box>
+        <FilterBar
+          status={statusFilter}
+          priority={priorityFilter}
+          onStatusChange={setStatusFilter}
+          onPriorityChange={setPriorityFilter}
+        />
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+        {fab}
       </Box>
     );
   }
 
   if (isError) {
     return (
-      <Alert severity="error">
-        Falha ao carregar tarefas: {(error as Error).message}
-      </Alert>
+      <Box>
+        <FilterBar
+          status={statusFilter}
+          priority={priorityFilter}
+          onStatusChange={setStatusFilter}
+          onPriorityChange={setPriorityFilter}
+        />
+        <Alert severity="error">
+          Falha ao carregar tarefas: {(error as Error).message}
+        </Alert>
+        {fab}
+      </Box>
     );
   }
 
   if (!data || data.length === 0) {
+    const hasFilters = statusFilter !== 'All' || priorityFilter !== 'All';
     return (
       <Box>
-        <Paper sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6">Nenhuma tarefa ainda</Typography>
+        <FilterBar
+          status={statusFilter}
+          priority={priorityFilter}
+          onStatusChange={setStatusFilter}
+          onPriorityChange={setPriorityFilter}
+        />
+        <Paper sx={{ p: 3, textAlign: 'center', mt: 2 }}>
+          <Typography variant="h6">
+            {hasFilters ? 'Nenhuma tarefa com esses filtros' : 'Nenhuma tarefa ainda'}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
-            Clique no botão ➕ abaixo pra criar a primeira.
+            {hasFilters
+              ? 'Tente limpar os filtros ou criar uma nova tarefa.'
+              : 'Clique no botão ➕ abaixo pra criar a primeira.'}
           </Typography>
         </Paper>
-        <Fab
-          color="primary"
-          aria-label="criar nova tarefa"
-          onClick={() => navigate('/create')}
-          sx={{ position: 'fixed', bottom: 24, right: 24 }}
-        >
-          <AddIcon />
-        </Fab>
+        {fab}
       </Box>
     );
   }
@@ -84,40 +150,72 @@ export function TaskListPage() {
       <Typography variant="h4" gutterBottom>
         📋 Lista de Tarefas
       </Typography>
-      <Paper>
-        <List>
-          {data.map((task, index) => (
-            <Box key={task.id}>
-              {index > 0 && <Divider />}
-              <ListItem
-                component={RouterLink}
-                to={`/tasks/${task.id}`}
-                secondaryAction={<TaskStatusChip status={task.status} />}
-                sx={{
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  '&:hover': { backgroundColor: 'action.hover' },
-                }}
-              >
-                <ListItemText
-                  primary={task.title}
-                  secondary={`Prioridade: ${task.priority} • Vencimento: ${new Date(task.dueDate).toLocaleDateString('pt-BR')}`}
-                />
-              </ListItem>
-            </Box>
-          ))}
-        </List>
-      </Paper>
 
-      {/* FAB: ação primária visível em qualquer estado */}
-      <Fab
-        color="primary"
-        aria-label="criar nova tarefa"
-        onClick={() => navigate('/create')}
-        sx={{ position: 'fixed', bottom: 24, right: 24 }}
-      >
-        <AddIcon />
-      </Fab>
+      <FilterBar
+        status={statusFilter}
+        priority={priorityFilter}
+        onStatusChange={setStatusFilter}
+        onPriorityChange={setPriorityFilter}
+      />
+
+      <Stack spacing={1.5} sx={{ mt: 2 }}>
+        {data.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onClick={() => navigate(`/tasks/${task.id}`)}
+          />
+        ))}
+      </Stack>
+
+      {fab}
     </Box>
+  );
+}
+
+// ============================================================
+// FilterBar (componente auxiliar inline)
+// ============================================================
+interface FilterBarProps {
+  status: StatusFilter;
+  priority: PriorityFilter;
+  onStatusChange: (s: StatusFilter) => void;
+  onPriorityChange: (p: PriorityFilter) => void;
+}
+
+function FilterBar({ status, priority, onStatusChange, onPriorityChange }: FilterBarProps) {
+  return (
+    <Paper sx={{ p: 2, mb: 2 }}>
+      <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          Status:
+        </Typography>
+        {STATUS_OPTIONS.map((opt) => (
+          <Chip
+            key={opt}
+            label={STATUS_LABEL[opt]}
+            color={STATUS_COLOR[opt]}
+            variant={status === opt ? 'filled' : 'outlined'}
+            onClick={() => onStatusChange(opt)}
+            size="small"
+          />
+        ))}
+
+        <TextField
+          select
+          label="Prioridade"
+          value={priority}
+          onChange={(e) => onPriorityChange(e.target.value as PriorityFilter)}
+          size="small"
+          sx={{ minWidth: 140 }}
+        >
+          {PRIORITY_OPTIONS.map((opt) => (
+            <MenuItem key={opt} value={opt}>
+              {opt === 'All' ? 'Todas' : opt}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Stack>
+    </Paper>
   );
 }
