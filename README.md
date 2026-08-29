@@ -85,29 +85,8 @@ src/
 - **TanStack Query em vez de Redux/Context** — server-state não é state global da app, é cache de rede. TanStack Query lida com refetch, retry, invalidação por chave (`['tasks', filters]`).
 - **Filtros server-side** — `useQuery(['tasks', filterParams])` muda a chave quando o filtro muda, TanStack dispara refetch automático. Backend aceita `?status=&priority=`.
 - **Validação Zod no client + server** — redundância proposital. Client dá feedback instantâneo; backend é a fonte da verdade.
-- **Tema M2 customizado** — a empresa-alvo usa M2 (não M3). Tema em `src/theme/theme.ts` define tokens (cores, typography Roboto, borderRadius 4px).
-- **Storybook por componente** — não Storybook do app inteiro. Cada componente isolado, com controles pra variar props. Designers/POs revisam visual sem rodar a app.
-
----
-
-## Status do projeto (honesto)
-
-✅ **Feito e funcional**
-- Setup completo, tema M2, 2 componentes com stories
-- 3 páginas funcionais (lista com filtros, detalhe, criação)
-- Integração end-to-end com backend
-- Validação client + server
-
-🟡 **Em progresso**
-- Acessibilidade (a11y) — foco e aria-labels parciais
-- Cobertura de testes no front (Vitest instalado mas sem suite ainda)
-
-🔴 **Ainda não feito**
-- Autenticação (qualquer um cria tarefas — não tem user concept no front)
-- Testes E2E (Playwright instalado mas não configurado)
-- Internacionalização (hoje só pt-BR)
-- PWA / offline mode
-- CI pipeline no GitHub Actions
+- **Tema M2 customizado** — empresa usa M2 (não M3). Tema em `src/theme/theme.ts` define tokens (cores, typography Roboto, borderRadius 4px).
+- **Storybook por componente** — não Storybook do app inteiro. Cada componente isolado, com controles pra variar props.
 
 ---
 
